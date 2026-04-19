@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>İş Zekası Araçları Rehberi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: linear-gradient(135deg, #e8e0d5, #d4c9b0, #c8d5c0);
+      --card: #faf7f2;
+      --green: #5a6b4e;
+      --green-light: #7a9b6e;
+      --green-pale: #eef2eb;
+      --beige: #a0937d;
+      --beige-light: #d4c9b0;
+      --text: #3d3529;
+      --text-mid: #5a5040;
+      --text-light: #7a6e5f;
+    }
+
+    body {
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
+      background: var(--bg);
+      min-height: 100vh;
+      padding: 40px 20px 80px;
+      color: var(--text);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 60px;
+    }
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem;
+      font-weight: 600;
+      color: var(--green);
+      margin-bottom: 12px;
+    }
+    .hero p {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-style: italic;
+      color: var(--beige);
+      margin-bottom: 32px;
+    }
+    .hero-btns {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      padding: 14px 32px;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Lato', sans-serif;
+      font-weight: 400;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--text); }
+    .btn-outline {
+      padding: 14px 32px;
+      background: transparent;
+      color: var(--green);
+      border: 1.5px solid var(--green);
+      border-radius: 10px;
+      font-family: 'Lato', sans-serif;
+      font-weight: 400;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover { background: var(--green-pale); }
+
+    /* ── QUIZ ── */
+    .quiz-wrap {
+      max-width: 560px;
+      margin: 0 auto 80px;
+      display: none;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(90,80,60,0.12);
+    }
+    .progress-bar {
+      background: #e0d8cc;
+      border-radius: 10px;
+      height: 4px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      background: var(--green-light);
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.4s ease;
+    }
+    .q-label {
+      font-size: 0.72rem;
+      color: var(--beige);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+    .q-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      color: var(--text);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .options { display: flex; flex-direction: column; gap: 12px; }
+    .opt-btn {
+      padding: 14px 18px;
+      border: 1.5px solid var(--beige-light);
+      border-radius: 10px;
+      background: var(--card);
+      color: var(--text-mid);
+      font-size: 0.9rem;
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    .opt-btn:hover {
+      border-color: var(--green-light);
+      background: var(--green-pale);
+      color: var(--text);
+    }
+
+    /* ── RESULT ── */
+    .result-card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(90,80,60,0.12);
+    }
+    .result-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .result-header h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: var(--beige);
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+    .result-header h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      color: var(--green);
+      font-weight: 600;
+    }
+    .result-desc {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      color: var(--text-light);
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 28px;
+      text-align: center;
+    }
+    .result-pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 500px) { .result-pros-cons { grid-template-columns: 1fr; } }
+    .pros-box, .cons-box {
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .pros-box { background: var(--green-pale); }
+    .cons-box { background: #f5ede8; }
+    .pros-box h4 { color: var(--green); margin-bottom: 10px; font-size: 0.8rem; letter-spacing: 1px; }
+    .cons-box h4 { color: #b06050; margin-bottom: 10px; font-size: 0.8rem; letter-spacing: 1px; }
+    .pros-box li, .cons-box li {
+      font-size: 0.85rem;
+      color: var(--text-mid);
+      margin-bottom: 6px;
+      list-style: none;
+    }
+    .pros-box li::before { content: "✓  "; color: var(--green-light); }
+    .cons-box li::before { content: "✗  "; color: #c07060; }
+    .result-screenshot {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 28px;
+      background: #e8e0d5;
+      aspect-ratio: 16/9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .result-screenshot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+    .screenshot-placeholder {
+      color: var(--beige);
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 1rem;
+    }
+    .runner-up {
+      background: var(--green-pale);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      font-size: 0.88rem;
+      color: var(--text-mid);
+    }
+    .runner-up strong { color: var(--green); }
+    .restart-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Lato', sans-serif;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .restart-btn:hover { background: var(--text); }
+
+    /* ── CATALOG ── */
+    .catalog-section {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .catalog-section h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem;
+      color: var(--green);
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .catalog-section .sub {
+      text-align: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      color: var(--beige);
+      font-size: 1.05rem;
+      margin-bottom: 40px;
+    }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 28px;
+    }
+    .tool-card {
+      background: var(--card);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 6px 24px rgba(90,80,60,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .tool-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 36px rgba(90,80,60,0.15);
+    }
+    .tool-screenshot {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      background: #ddd;
+      display: block;
+    }
+    .tool-screenshot-wrap {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: linear-gradient(135deg, #e0d8cc, #c8d5c0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .tool-screenshot-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .tool-screenshot-wrap .fallback-label {
+      position: absolute;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: var(--green);
+      font-weight: 600;
+      opacity: 0.5;
+    }
+    .tool-body { padding: 24px; }
+    .tool-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .tool-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--green);
+    }
+    .tool-badge {
+      font-size: 0.7rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+    }
+    .badge-free { background: #ddf0d4; color: #3a6b2a; }
+    .badge-mid  { background: #fdefd5; color: #8a5a10; }
+    .badge-ent  { background: #ede8f5; color: #5a3a8a; }
+    .tool-maker {
+      font-size: 0.78rem;
+      color: var(--beige);
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+    .tool-tagline {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      color: var(--text-light);
+      font-size: 0.95rem;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .pc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .pc-col h5 {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .pc-col.pros h5 { color: var(--green-light); }
+    .pc-col.cons h5 { color: #c07060; }
+    .pc-col ul { list-style: none; }
+    .pc-col ul li {
+      font-size: 0.8rem;
+      color: var(--text-mid);
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+    .pc-col.pros li::before { content: "+ "; color: var(--green-light); font-weight: 700; }
+    .pc-col.cons li::before { content: "− "; color: #c07060; font-weight: 700; }
+    .tool-price {
+      font-size: 0.78rem;
+      color: var(--beige);
+      border-top: 1px solid var(--beige-light);
+      padding-top: 12px;
+    }
+    .tool-price span {
+      color: var(--text-mid);
+      font-weight: 400;
+    }
+    .best-for {
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: var(--beige);
+    }
+    .best-for span { color: var(--green); font-weight: 400; }
+
+    /* ── LOGIN OVERLAY ── */
+    #login-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 20px;
+    }
+    .login-card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 48px 40px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 10px 40px rgba(90,80,60,0.15);
+      text-align: center;
+    }
+    .login-card h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+    .login-card p {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      color: var(--beige);
+      font-size: 1rem;
+      margin-bottom: 32px;
+    }
+    .login-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid var(--beige-light);
+      border-radius: 10px;
+      background: #faf7f2;
+      font-family: 'Lato', sans-serif;
+      font-size: 0.95rem;
+      color: var(--text);
+      margin-bottom: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .login-input:focus { border-color: var(--green-light); }
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Lato', sans-serif;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .login-btn:hover { background: var(--text); }
+    .login-btn:disabled { background: var(--beige-light); cursor: default; }
+    .login-msg {
+      margin-top: 20px;
+      font-size: 0.88rem;
+      min-height: 20px;
+    }
+    .login-msg.success { color: var(--green); font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1rem; }
+    .login-msg.error   { color: #c07060; }
+
+    /* ── TOPBAR (logged in) ── */
+    #topbar {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: rgba(250,247,242,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--beige-light);
+      padding: 12px 24px;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #topbar span {
+      font-size: 0.8rem;
+      color: var(--beige);
+      font-family: 'Lato', sans-serif;
+    }
+    #topbar button {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      background: none;
+      border: 1px solid var(--beige-light);
+      border-radius: 6px;
+      padding: 5px 12px;
+      cursor: pointer;
+      font-family: 'Lato', sans-serif;
+      transition: all 0.2s;
+    }
+    #topbar button:hover { border-color: var(--green); color: var(--green); }
+
+    /* section divider */
+    .divider {
+      text-align: center;
+      margin: 60px 0 20px;
+    }
+    .divider::before {
+      content: "✦  ✦  ✦";
+      color: var(--beige-light);
+      font-size: 1rem;
+      letter-spacing: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay">
+  <div class="login-card">
+    <h1>İş Zekası Rehberi</h1>
+    <p>Devam etmek için e-posta adresinizi girin</p>
+    <input id="login-email" class="login-input" type="email" placeholder="ornek@sirket.com" />
+    <button class="login-btn" id="login-btn" onclick="sendMagicLink()">Bağlantı Gönder</button>
+    <div class="login-msg" id="login-msg"></div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <span id="topbar-email"></span>
+  <button onclick="signOut()">Çıkış Yap</button>
+</div>
+
+<!-- MAIN (hidden until auth) -->
+<div id="main-content" style="display:none; padding-top: 56px;">
+
+<!-- HERO -->
+<div class="hero">
+  <h1>İş Zekası Araçları</h1>
+  <p>Verini en iyi hangi araç anlatır? Kısa quizi çöz, sana özel öneri al.</p>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="startQuiz()">Quiz'i Başlat</button>
+    <button class="btn-outline" onclick="scrollToCatalog()">Tüm Araçları Gör</button>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-wrap" id="quiz-wrap">
+  <div class="card" id="quiz-card">
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+    <div class="q-label" id="q-label"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="options" id="q-options"></div>
+  </div>
+  <div id="result-wrap" style="display:none;">
+    <div class="result-card">
+      <div class="result-header">
+        <h2>SENİN İÇİN EN UYGUN ARAÇ</h2>
+        <h3 id="r-name"></h3>
+      </div>
+      <div class="result-screenshot" id="r-screenshot">
+        <img id="r-img" src="" alt="" onerror="this.style.display='none';document.getElementById('r-placeholder').style.display='block';">
+        <span class="screenshot-placeholder" id="r-placeholder" style="display:none;">Dashboard önizlemesi yüklenemedi</span>
+      </div>
+      <div class="result-desc" id="r-desc"></div>
+      <div class="result-pros-cons">
+        <div class="pros-box">
+          <h4>ARTILARI</h4>
+          <ul id="r-pros"></ul>
+        </div>
+        <div class="cons-box">
+          <h4>EKSİLERİ</h4>
+          <ul id="r-cons"></ul>
+        </div>
+      </div>
+      <div class="runner-up" id="r-runner"></div>
+      <button class="restart-btn" onclick="restartQuiz()">Tekrar Dene</button>
+    </div>
+  </div>
+</div>
+
+<div class="divider" id="catalog-divider" style="display:none;"></div>
+
+<!-- CATALOG -->
+<div class="catalog-section" id="catalog" style="display:none;">
+  <h2>Tüm Araçlar</h2>
+  <p class="sub">Popüler iş zekası platformlarını karşılaştır</p>
+  <div class="tools-grid" id="tools-grid"></div>
+</div>
+
+<script>
+/* ─── DATA ─── */
+const tools = [
+  {
+    id: "powerbi",
+    name: "Power BI",
+    maker: "Microsoft",
+    badge: "mid",
+    badgeLabel: "Orta Fiyat",
+    tagline: "Microsoft ekosisteminin kalbi; Excel'den veri ambarına kadar her şeyi tek çatıda toplar.",
+    screenshot: "https://learn.microsoft.com/tr-tr/power-bi/create-reports/media/desktop-report-themes/report-themes-2a.png",
+    pros: ["Excel & Office 365 entegrasyonu", "Güçlü DAX dil desteği", "Geniş topluluk & belge", "Makul fiyat (Pro $10/ay)", "Canlı veri yenileme"],
+    cons: ["Windows/Azure bağımlılığı", "UI bazen karmaşık", "Büyük verida yavaşlayabilir", "Salesforce/GCP ile zayıf entegrasyon"],
+    price: "$10/kullanıcı/ay (Pro) · $20 (Premium Per User)",
+    bestFor: "Microsoft shop, kurumsal raporlama, Excel kullanıcıları",
+    scores: { startup: 1, sme: 3, enterprise: 3, nontechnical: 3, semitechnical: 3, technical: 2, free: 0, midprice: 3, expensive: 2, reporting: 3, analysis: 2, monitoring: 0, embedded: 1, sql: 2, saas: 2, timeseries: 0, warehouse: 2 }
+  },
+  {
+    id: "tableau",
+    name: "Tableau",
+    maker: "Salesforce",
+    badge: "ent",
+    badgeLabel: "Kurumsal",
+    tagline: "Görselleştirmenin altın standardı. Analist ekiplerinin veriyi hikâyeye dönüştürme aracı.",
+    screenshot: "https://help.tableau.com/current/pro/desktop/en-us/Img/build_manual_view5.png",
+    pros: ["En güçlü görselleştirme motoru", "Drag-drop kolaylığı", "Hızlı keşif & iterasyon", "Geniş bağlantı kütüphanesi", "Güçlü topluluk & Tableau Public"],
+    cons: ["Çok pahalı ($70+/kullanıcı/ay)", "Salesforce lisanslama karmaşıklığı", "Büyük ölçekte yönetim zorluğu", "Gömülü kullanım kısıtlı"],
+    price: "$70/kullanıcı/ay (Explorer) · $35 (Viewer)",
+    bestFor: "Veri analisti odaklı şirketler, self-serve BI",
+    scores: { startup: 0, sme: 2, enterprise: 3, nontechnical: 2, semitechnical: 3, technical: 3, free: 0, midprice: 1, expensive: 3, reporting: 2, analysis: 3, monitoring: 0, embedded: 1, sql: 2, saas: 2, timeseries: 1, warehouse: 3 }
+  },
+  {
+    id: "looker",
+    name: "Looker",
+    maker: "Google Cloud",
+    badge: "ent",
+    badgeLabel: "Kurumsal",
+    tagline: "LookML ile merkezi metrik tanımı; modern veri yığını için tasarlanmış semantik katman.",
+    screenshot: "https://cloud.google.com/static/looker/docs/images/looker-studio-dashboards.png",
+    pros: ["Merkezi metrik yönetimi (LookML)", "BigQuery ile mükemmel entegrasyon", "Güçlü API & gömülü kullanım", "Row-level security", "Modern data stack uyumu"],
+    cons: ["Çok pahalı (≥$3.000/ay)", "LookML öğrenme eğrisi dik", "Küçük şirketler için overkill", "Yavaş geliştirme döngüsü"],
+    price: "Kurumsal fiyatlandırma (~$3.000+/ay)",
+    bestFor: "Büyük veri ekipleri, BigQuery/Snowflake, gömülü analytics",
+    scores: { startup: 0, sme: 1, enterprise: 3, nontechnical: 1, semitechnical: 2, technical: 3, free: 0, midprice: 0, expensive: 3, reporting: 2, analysis: 3, monitoring: 0, embedded: 3, sql: 3, saas: 1, timeseries: 0, warehouse: 3 }
+  },
+  {
+    id: "metabase",
+    name: "Metabase",
+    maker: "Metabase, Inc.",
+    badge: "free",
+    badgeLabel: "Açık Kaynak",
+    tagline: "Teknik olmayan ekiplerin bile beş dakikada dashboard kurabileceği açık kaynak BI aracı.",
+    screenshot: "https://www.metabase.com/images/hero/hero@2x.png",
+    pros: ["Ücretsiz open-source sürüm", "Son derece kolay kullanım", "Hızlı kurulum (<30 dk)", "SQL + no-code karma", "Gömülü iframe desteği"],
+    cons: ["Büyük ölçekte performans sorunları", "Sınırlı özelleştirme", "Enterprise özellikleri pahalı", "LookML gibi semantik katman yok"],
+    price: "Ücretsiz (self-hosted) · $500/ay (Cloud Starter)",
+    bestFor: "Startuplar, teknik olmayan ekipler, hızlı prototipleme",
+    scores: { startup: 3, sme: 3, enterprise: 1, nontechnical: 3, semitechnical: 2, technical: 2, free: 3, midprice: 2, expensive: 0, reporting: 3, analysis: 2, monitoring: 0, embedded: 2, sql: 2, saas: 1, timeseries: 0, warehouse: 1 }
+  },
+  {
+    id: "grafana",
+    name: "Grafana",
+    maker: "Grafana Labs",
+    badge: "free",
+    badgeLabel: "Açık Kaynak",
+    tagline: "DevOps & SRE'nin gözetleme merkezi. Prometheus, Loki ve InfluxDB ile bütünleşik izleme.",
+    screenshot: "https://grafana.com/static/img/screenshots/grafana_8_dashboard_dark.png",
+    pros: ["Açık kaynak & ücretsiz", "Time-series için ölçek ötesi", "Prometheus/Loki entegrasyonu", "Alert yönetimi güçlü", "On-prem kurulabilir"],
+    cons: ["İş analitiği için zayıf", "SQL joins / pivot yok", "Teknik olmayan kullanıcılar için zor", "Panel konfigürasyonu karmaşık"],
+    price: "Ücretsiz (OSS) · $8/kullanıcı/ay (Cloud)",
+    bestFor: "DevOps/SRE, sistem monitoring, time-series verisi",
+    scores: { startup: 2, sme: 2, enterprise: 2, nontechnical: 0, semitechnical: 2, technical: 3, free: 3, midprice: 1, expensive: 0, reporting: 0, analysis: 1, monitoring: 3, embedded: 1, sql: 1, saas: 0, timeseries: 3, warehouse: 0 }
+  },
+  {
+    id: "superset",
+    name: "Apache Superset",
+    maker: "Apache Software Foundation",
+    badge: "free",
+    badgeLabel: "Açık Kaynak",
+    tagline: "SQL Lab ile güçlü veri keşfi; 40+ grafik tipiyle modern, açık kaynak BI platformu.",
+    screenshot: "https://superset.apache.org/img/hero-screenshot.jpg",
+    pros: ["Tamamen ücretsiz & açık kaynak", "Güçlü SQL Lab editörü", "40+ görselleştirme tipi", "Role-based access control", "Docker ile kolay dağıtım"],
+    cons: ["Kurulum ve bakım teknik ekip ister", "Resmi kurumsal destek yok", "Bazı özellikler eksik/ham", "Döküman dağınık"],
+    price: "Ücretsiz (self-hosted) · Preset.io ile ücretli SaaS",
+    bestFor: "Teknik data ekipleri, SQL ağırlıklı analiz, maliyet bilinçli şirketler",
+    scores: { startup: 2, sme: 2, enterprise: 1, nontechnical: 0, semitechnical: 2, technical: 3, free: 3, midprice: 1, expensive: 0, reporting: 2, analysis: 3, monitoring: 0, embedded: 1, sql: 3, saas: 0, timeseries: 1, warehouse: 2 }
+  },
+  {
+    id: "datastudio",
+    name: "Looker Studio",
+    maker: "Google (eski adı: Data Studio)",
+    badge: "free",
+    badgeLabel: "Ücretsiz",
+    tagline: "Google ekosisteminin ücretsiz BI aracı. GA4, Sheets ve BigQuery ile anında bağlantı.",
+    screenshot: "https://storage.googleapis.com/support-kms-prod/VCNhpQPivjhKZyBhCHiVB6v0jS5m0H6x8bqz",
+    pros: ["Tamamen ücretsiz", "Google Ads, GA4, Sheets entegrasyonu", "Kolay paylaşım & işbirliği", "Hızlı kurulum, sıfır altyapı", "200+ topluluk konnektörü"],
+    cons: ["Sınırlı görselleştirme seçenekleri", "Büyük veri setlerinde yavaş", "Gelişmiş hesaplamalar kısıtlı", "Offline çalışmaz, tam Google bağımlı"],
+    price: "Tamamen ücretsiz",
+    bestFor: "Google ekosistemi kullananlar, pazarlama ekipleri, GA4/Ads raporlama",
+    scores: { startup: 3, sme: 3, enterprise: 1, nontechnical: 3, semitechnical: 2, technical: 1, free: 3, midprice: 1, expensive: 0, reporting: 3, analysis: 2, monitoring: 0, embedded: 1, sql: 1, saas: 3, timeseries: 1, warehouse: 2 }
+  },
+];
+
+/* ─── QUIZ ─── */
+const questions = [
+  {
+    text: "Şirketinizin büyüklüğü nedir?",
+    options: [
+      { label: "Startup / 1–20 kişi", keys: ["startup"] },
+      { label: "KOBİ / 20–200 kişi",  keys: ["sme"] },
+      { label: "Büyük kurumsal / 200+", keys: ["enterprise"] },
+    ]
+  },
+  {
+    text: "Ekibinizin teknik seviyesi nasıl?",
+    options: [
+      { label: "Teknik değil — SQL bilmiyoruz", keys: ["nontechnical"] },
+      { label: "Yarı teknik — bazı SQL bilgisi var", keys: ["semitechnical"] },
+      { label: "Teknik — data engineer / analist var", keys: ["technical"] },
+    ]
+  },
+  {
+    text: "Bütçe aralığınız?",
+    options: [
+      { label: "Ücretsiz / açık kaynak tercih ederiz", keys: ["free"] },
+      { label: "Orta bütçe ($100–1.000/ay)", keys: ["midprice"] },
+      { label: "Bütçe kısıtımız yok",             keys: ["expensive"] },
+    ]
+  },
+  {
+    text: "Birincil kullanım amacınız?",
+    options: [
+      { label: "Yönetim raporları & KPI izleme",   keys: ["reporting"] },
+      { label: "Veri keşfi & ad-hoc analiz",        keys: ["analysis"] },
+      { label: "Sistem & altyapı monitoring",       keys: ["monitoring"] },
+      { label: "Ürüne gömülü analytics",            keys: ["embedded"] },
+    ]
+  },
+  {
+    text: "Veri kaynaklarınız ağırlıklı olarak ne?",
+    options: [
+      { label: "SQL veritabanları (Postgres, MySQL…)", keys: ["sql"] },
+      { label: "Çeşitli SaaS araçları (Salesforce, HubSpot…)", keys: ["saas"] },
+      { label: "Time-series / metrik verileri",      keys: ["timeseries"] },
+      { label: "Veri ambarı (BigQuery, Snowflake…)", keys: ["warehouse"] },
+    ]
+  },
+];
+
+let current = 0;
+let scores = {};
+
+function resetScores() {
+  scores = {};
+  tools.forEach(t => scores[t.id] = 0);
+}
+
+function startQuiz() {
+  resetScores();
+  current = 0;
+  document.getElementById("quiz-wrap").style.display = "block";
+  document.getElementById("quiz-card").style.display = "block";
+  document.getElementById("result-wrap").style.display = "none";
+  document.getElementById("quiz-wrap").scrollIntoView({ behavior: "smooth" });
+  renderQuiz();
+}
+
+function renderQuiz() {
+  const q = questions[current];
+  document.getElementById("q-label").textContent = `Soru ${current + 1} / ${questions.length}`;
+  document.getElementById("q-text").textContent = q.text;
+  document.getElementById("progress").style.width = `${(current / questions.length) * 100}%`;
+
+  const opts = document.getElementById("q-options");
+  opts.innerHTML = "";
+  q.options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "opt-btn";
+    btn.textContent = opt.label;
+    btn.onclick = () => answerQuiz(opt.keys);
+    opts.appendChild(btn);
+  });
+}
+
+function answerQuiz(keys) {
+  tools.forEach(tool => {
+    keys.forEach(k => {
+      if (tool.scores[k] !== undefined) scores[tool.id] += tool.scores[k];
+    });
+  });
+  current++;
+  if (current >= questions.length) showResult();
+  else renderQuiz();
+}
+
+function showResult() {
+  document.getElementById("progress").style.width = "100%";
+  document.getElementById("quiz-card").style.display = "none";
+
+  const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const winner = tools.find(t => t.id === ranked[0][0]);
+  const runnerTool = tools.find(t => t.id === ranked[1][0]);
+
+  document.getElementById("r-name").textContent = winner.name;
+  const img = document.getElementById("r-img");
+  img.src = winner.screenshot;
+  img.alt = winner.name + " dashboard";
+  document.getElementById("r-placeholder").style.display = "none";
+  img.style.display = "block";
+
+  document.getElementById("r-desc").textContent = winner.tagline;
+
+  const pros = document.getElementById("r-pros");
+  pros.innerHTML = "";
+  winner.pros.slice(0, 4).forEach(p => { const li = document.createElement("li"); li.textContent = p; pros.appendChild(li); });
+
+  const cons = document.getElementById("r-cons");
+  cons.innerHTML = "";
+  winner.cons.slice(0, 4).forEach(c => { const li = document.createElement("li"); li.textContent = c; cons.appendChild(li); });
+
+  document.getElementById("r-runner").innerHTML =
+    `<strong>Alternatif öneri:</strong> ${runnerTool.name} — ${runnerTool.tagline}`;
+
+  document.getElementById("result-wrap").style.display = "block";
+  document.getElementById("result-wrap").scrollIntoView({ behavior: "smooth" });
+}
+
+function restartQuiz() {
+  startQuiz();
+}
+
+function scrollToCatalog() {
+  document.getElementById("catalog-divider").style.display = "block";
+  document.getElementById("catalog").style.display = "block";
+  setTimeout(() => document.getElementById("catalog").scrollIntoView({ behavior: "smooth" }), 50);
+}
+
+/* ─── CATALOG RENDER ─── */
+function renderCatalog() {
+  const grid = document.getElementById("tools-grid");
+  tools.forEach(tool => {
+    const card = document.createElement("div");
+    card.className = "tool-card";
+
+    const badgeClass = { free: "badge-free", mid: "badge-mid", ent: "badge-ent" }[tool.badge];
+
+    card.innerHTML = `
+      <div class="tool-screenshot-wrap">
+        <img src="${tool.screenshot}" alt="${tool.name} dashboard"
+             onerror="this.style.display='none'">
+        <span class="fallback-label">${tool.name}</span>
+      </div>
+      <div class="tool-body">
+        <div class="tool-header">
+          <span class="tool-name">${tool.name}</span>
+          <span class="tool-badge ${badgeClass}">${tool.badgeLabel}</span>
+        </div>
+        <div class="tool-maker">${tool.maker}</div>
+        <div class="tool-tagline">${tool.tagline}</div>
+        <div class="pc-grid">
+          <div class="pc-col pros">
+            <h5>Artıları</h5>
+            <ul>${tool.pros.map(p => `<li>${p}</li>`).join("")}</ul>
+          </div>
+          <div class="pc-col cons">
+            <h5>Eksileri</h5>
+            <ul>${tool.cons.map(c => `<li>${c}</li>`).join("")}</ul>
+          </div>
+        </div>
+        <div class="tool-price">Fiyat: <span>${tool.price}</span></div>
+        <div class="best-for">En iyi: <span>${tool.bestFor}</span></div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+renderCatalog();
+</script>
+
+</div><!-- /main-content -->
+
+<script>
+/* ─── SUPABASE AUTH ─── */
+const SUPABASE_URL  = "https://idpsborcyulisicxlkqu.supabase.co";
+const SUPABASE_KEY  = "sb_publishable_AjymlXwzyfzA9IuLF1ExgA_CCROF2Ol";
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function showApp(email) {
+  document.getElementById("login-overlay").style.display  = "none";
+  document.getElementById("main-content").style.display   = "block";
+  const tb = document.getElementById("topbar");
+  tb.style.display = "flex";
+  document.getElementById("topbar-email").textContent = email;
+}
+
+async function sendMagicLink() {
+  const email = document.getElementById("login-email").value.trim();
+  const msg   = document.getElementById("login-msg");
+  const btn   = document.getElementById("login-btn");
+  if (!email) { msg.className = "login-msg error"; msg.textContent = "Lütfen bir e-posta adresi girin."; return; }
+
+  btn.disabled = true;
+  btn.textContent = "Gönderiliyor…";
+  msg.className = "login-msg";
+  msg.textContent = "";
+
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.href }
+  });
+
+  if (error) {
+    msg.className = "login-msg error";
+    msg.textContent = "Hata: " + error.message;
+    btn.disabled = false;
+    btn.textContent = "Bağlantı Gönder";
+  } else {
+    msg.className = "login-msg success";
+    msg.textContent = "✦ E-posta gönderildi. Gelen kutunuzu kontrol edin.";
+    btn.textContent = "Gönderildi";
+  }
+}
+
+document.getElementById("login-email").addEventListener("keydown", e => {
+  if (e.key === "Enter") sendMagicLink();
+});
+
+async function signOut() {
+  await sb.auth.signOut();
+  document.getElementById("login-overlay").style.display = "flex";
+  document.getElementById("main-content").style.display  = "none";
+  document.getElementById("topbar").style.display        = "none";
+  document.getElementById("login-email").value           = "";
+  document.getElementById("login-msg").textContent       = "";
+  document.getElementById("login-btn").disabled          = false;
+  document.getElementById("login-btn").textContent       = "Bağlantı Gönder";
+}
+
+sb.auth.onAuthStateChange((event, session) => {
+  if (session?.user) {
+    showApp(session.user.email);
+  }
+});
+
+/* Sayfa yüklendiğinde oturum kontrolü */
+sb.auth.getSession().then(({ data: { session } }) => {
+  if (session?.user) showApp(session.user.email);
+});
+</script>
+</body>
+</html>
